@@ -1,0 +1,63 @@
+---
+apiVersion: apps/v1 #beta2 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: magic-mirror
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: kms-magic-mirror
+  replicas: 1 # tells deployment to run 1 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: kms-magic-mirror
+    spec:
+      containers:
+      - name: kurento-magic-mirror
+        image: nordri/kurento-magic-mirror:no-ssl
+        env:
+        - name: "KMS_URL"
+          value: "kms-service"
+        - name: "KMS_PORT"
+          value: "8888"
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: magic-mirror-service
+  labels:
+    app: kms-magic-mirror
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: magic-mirror-port
+  selector:
+    app: kms-magic-mirror
+  type: ClusterIP
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+    name: magic-mirror-ingress
+    labels:
+      app: kurento-magic-mirror
+spec:
+  tls:
+  - hosts:
+    - magic-mirror.openvidu.io
+    secretName: magic-mirror-secret
+  rules:
+  - host: magic-mirror.openvidu.io
+    http:
+      paths:
+      - backend:
+          serviceName: magic-mirror-service
+          servicePort: 8080
+        
