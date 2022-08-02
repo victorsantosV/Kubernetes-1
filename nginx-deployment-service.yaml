@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx
+        image: gcr.io/fnt-fatban-dev/github.com/victorsantosv/projeto_automatizado@sha256:2289ca296125b7e8529560d8210bb68828b26914ed5576e617f7141def66056e
         ports:
         - containerPort: 80
 ---
